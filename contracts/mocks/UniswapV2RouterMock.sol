@@ -11,13 +11,10 @@ contract UniswapV2RouterMock {
     using SafeERC20 for IERC20;
 
     address staking;
-    address reward;
-    address tokenA;
-    address tokenB;
 
-    constructor(address _staking, address _reward) {
+
+    constructor(address _staking) {
         staking = _staking;
-        reward = _reward;
     }
 
     function addLiquidity(
