@@ -8,27 +8,10 @@ import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
 
 
 interface IStakingRewards {
-    // Views
-    function lastTimeRewardApplicable() external view returns (uint256);
-
-    function rewardPerToken() external view returns (uint256);
-
     function earned(address account) external view returns (uint256);
-
-    function getRewardForDuration() external view returns (uint256);
-
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address account) external view returns (uint256);
-
-    // Mutative
-
     function stake(uint256 amount) external;
-
     function withdraw(uint256 amount) external;
-
     function getReward() external;
-
     function exit() external;
 }
 
@@ -52,8 +35,6 @@ interface IUniswapV2Router {
         uint deadline
     ) external returns (uint[] memory amounts);
 }
-
-
 
 
 contract UniV2Optimizer is Ownable {
@@ -155,8 +136,8 @@ contract UniV2Optimizer is Ownable {
     
 
     function getPendingRewards() external view onlyOwner returns(uint256) {
-        uint256 reward = IStakingRewards(stakingRewardAddr).earned(address(this));
-        return reward;
+        uint256 pendingReward = IStakingRewards(stakingRewardAddr).earned(address(this));
+        return pendingReward;
     }
 
     function _stakeAll() internal {
@@ -167,6 +148,11 @@ contract UniV2Optimizer is Ownable {
     function _withdraw(uint256 _amount) internal {
         IStakingRewards(stakingRewardAddr).withdraw(_amount);
         staked = staked.sub(_amount);
+    }
+
+    function _exit() internal {
+        IStakingRewards(stakingRewardAddr).exit();
+        staked = 0;
     }
 
     function _claimReward() internal {
