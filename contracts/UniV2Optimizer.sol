@@ -43,13 +43,7 @@ contract UniV2Optimizer is Ownable {
 
     
     uint256 constant MAX_INT = 2**256 - 1;
-
-    /**
-     * @dev Interfacing contracts addresses
-     */
-    address public stakingRewardAddr;
-    address public uniV2RouterAddr;
-    
+   
     /**
      * @dev Tokens addresses
      */    
@@ -57,6 +51,12 @@ contract UniV2Optimizer is Ownable {
     address public tokenB; 
     address public staking;
     address public reward;
+
+    /**
+     * @dev Interfacing contracts addresses
+     */
+    address public stakingRewardAddr;
+    address public uniV2RouterAddr;
     
     /**
      * @dev Token swap route addresses 
