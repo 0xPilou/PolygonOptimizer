@@ -88,6 +88,8 @@ contract UniV2Optimizer is Ownable {
         
         IERC20(_staking).safeApprove(_stakingRewardAddr, 0);
         IERC20(_staking).safeApprove(_stakingRewardAddr, MAX_INT);
+        IERC20(_reward).safeApprove(_uniV2RouterAddr, 0);
+        IERC20(_reward).safeApprove(_uniV2RouterAddr, MAX_INT);        
         IERC20(_tokenA).safeApprove(_uniV2RouterAddr, 0);
         IERC20(_tokenA).safeApprove(_uniV2RouterAddr, MAX_INT);
         IERC20(_tokenB).safeApprove(_uniV2RouterAddr, 0);
