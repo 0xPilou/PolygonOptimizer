@@ -13,30 +13,37 @@ const UniswapV2RouterMock = artifacts.require("UniswapV2RouterMock");
  *  Contracts Under Tests
  */
 const UniV2Optimizer = artifacts.require("UniV2Optimizer");
+const UniV2OptimizerFactory = artifacts.require("UniV2OptimizerFactory");
+
 
 
 module.exports = (deployer, network, [owner]) => deployer
+  .then(() => deployUniV2OptimizerFactory(deployer))
   .then(() => deployUniV2Optimizer(deployer))
   .then(() => displaySummary(owner));
 
 
-async function deployUniV2Optimizer(deployer) {
-  const tokenA = (await TokenA.deployed());
-  const tokenB = (await TokenB.deployed());
-  const staking = (await Staking.deployed());
-  const reward = (await Reward.deployed());
-  const stakingRewardMock = (await StakingRewardMock.deployed());
-  const uniswapV2RouterMock = (await UniswapV2RouterMock.deployed());
-  return deployer.deploy(
-      UniV2Optimizer,
-      tokenA.address,
-      tokenB.address,
-      staking.address,
-      reward.address,
-      stakingRewardMock.address,
-      uniswapV2RouterMock.address
-    );
+async function deployUniV2OptimizerFactory(deployer) {
+    return deployer.deploy(UniV2OptimizerFactory);
 }
+
+async function deployUniV2Optimizer(deployer) {
+    const tokenA = (await TokenA.deployed());
+    const tokenB = (await TokenB.deployed());
+    const staking = (await Staking.deployed());
+    const reward = (await Reward.deployed());
+    const stakingRewardMock = (await StakingRewardMock.deployed());
+    const uniswapV2RouterMock = (await UniswapV2RouterMock.deployed());
+    return deployer.deploy(
+        UniV2Optimizer,
+        tokenA.address,
+        tokenB.address,
+        staking.address,
+        reward.address,
+        stakingRewardMock.address,
+        uniswapV2RouterMock.address
+      );
+  }
 
 async function displaySummary(owner) {
   const staking = (await Staking.deployed());
@@ -46,6 +53,7 @@ async function displaySummary(owner) {
   const stakingRewardMock = (await StakingRewardMock.deployed());
   const uniswapV2RouterMock = (await UniswapV2RouterMock.deployed());
   const uniV2Optimizer = (await UniV2Optimizer.deployed());
+  const uniV2OptimizerFactory = (await UniV2OptimizerFactory.deployed());
 
 
   console.log(
@@ -60,6 +68,7 @@ async function displaySummary(owner) {
         > Staking Reward Pool :     ${stakingRewardMock.address}
         > UniV2 Router :            ${uniswapV2RouterMock.address}
         > UniV2Optimizer :          ${uniV2Optimizer.address}
+        > UniV2OptimizerFactory :   ${uniV2OptimizerFactory.address}
 
     ===================================================
 
@@ -89,6 +98,10 @@ async function displaySummary(owner) {
             Token A :           ${web3.utils.fromWei(await tokenA.balanceOf(uniV2Optimizer.address))}
             Token B :           ${web3.utils.fromWei(await tokenB.balanceOf(uniV2Optimizer.address))}                               
 
-
+        > UniV2OptimizerFactory :  
+            Token Staking :     ${web3.utils.fromWei(await staking.balanceOf(uniV2OptimizerFactory.address))}
+            Token Reward :      ${web3.utils.fromWei(await reward.balanceOf(uniV2OptimizerFactory.address))}
+            Token A :           ${web3.utils.fromWei(await tokenA.balanceOf(uniV2OptimizerFactory.address))}
+            Token B :           ${web3.utils.fromWei(await tokenB.balanceOf(uniV2OptimizerFactory.address))}           
     ===================================================`);
 }
