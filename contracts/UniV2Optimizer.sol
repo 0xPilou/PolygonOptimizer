@@ -6,7 +6,6 @@ import 'openzeppelin-solidity/contracts/utils/Context.sol';
 import 'openzeppelin-solidity/contracts/access/Ownable.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
 
-
 interface IStakingRewards {
     function earned(address account) external view returns (uint256);
     function stake(uint256 amount) external;
@@ -136,6 +135,11 @@ contract UniV2Optimizer is Ownable {
         }
     }
     
+    function recoverERC20(address _ERC20) external onlyOwner {
+        if(IERC20(_ERC20).balanceOf(address(this)) > 0){
+            IERC20(_ERC20).safeTransfer(msg.sender, IERC20(_ERC20).balanceOf(address(this)));
+        }        
+    }
 
     function getPendingRewards() external view onlyOwner returns(uint256) {
         uint256 pendingReward = IStakingRewards(stakingRewardAddr).earned(address(this));
