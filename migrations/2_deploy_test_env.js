@@ -2,6 +2,7 @@ const Staking = artifacts.require("Staking");
 const Reward = artifacts.require("Reward");
 const TokenA = artifacts.require("TokenA");
 const TokenB = artifacts.require("TokenB");
+const TokenC = artifacts.require("TokenC");
 
 const StakingRewardMock = artifacts.require("StakingRewardMock");
 const UniswapV2RouterMock = artifacts.require("UniswapV2RouterMock");
@@ -13,6 +14,7 @@ module.exports = (deployer, network, [owner]) => deployer
   .then(() => deployReward(deployer))
   .then(() => deployTokenA(deployer))
   .then(() => deployTokenB(deployer))
+  .then(() => deployTokenC(deployer))
   .then(() => deployStakingReward(deployer))
   .then(() => deployUniV2Router(deployer))
   .then(() => transferRewardToStakingReward(owner))
@@ -31,7 +33,10 @@ function deployTokenA(deployer) {
 }
 function deployTokenB(deployer) {
     return deployer.deploy(TokenB, "Stake DAO Governance Token", "xSDT");
-  }
+}
+function deployTokenC(deployer) {
+    return deployer.deploy(TokenC, "Lost Token C", "tokenC");
+}  
 
 async function deployStakingReward(deployer) {
   const staking = (await Staking.deployed());
