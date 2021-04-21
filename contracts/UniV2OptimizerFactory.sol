@@ -68,7 +68,7 @@ contract UniV2OptimizerFactory is Ownable {
         return uniV2Optimizers.length;
     } 
     
-    function getProtocolCount() external view returns(uint) {
+    function getStrategyCount() external view returns(uint) {
         return strategies.length;
     }
 
