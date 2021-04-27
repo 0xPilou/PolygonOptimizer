@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { ethers, Contract } from 'ethers';
+import { ethers, Contract, utils } from 'ethers';
 import OptimizerFactory from './contracts/UniV2OptimizerFactory.json';
 import Optimizer from './contracts/UniV2Optimizer.json';
 import './App.css';
@@ -136,7 +136,7 @@ function App() {
   const StrategySupported = ({strategies}) => (
     <>
       {strategies.map((strategy, index) => (
-        <li key={index}>Protocol ID : {strategy.poolId.toString()}
+        <li key={index}>Pool ID : {strategy.poolId.toString()}
           <ul>
             <li>Token A         : {strategy.tokenA.toString()}</li>
             <li>Token B         : {strategy.tokenB.toString()}</li>
@@ -161,9 +161,10 @@ function App() {
             <li>Contract Address : {optimizer.address}</li>
             <br/><br/>
             <li>LP Tokens :
-              <br/><br/>
+              <br/>
               <p> In Wallet : {optimizer.stakingBalance}</p>
-              <h5> Deposit LP Token :</h5>
+              <p> Staked : {optimizer.staked}</p>
+              <h3> Deposit LP Token :</h3>
               <div className='row'>        
               <form className="form-inline" onSubmit={e => depositLP(e, optimizer.optimizerContract)}>
                 <input 
@@ -188,23 +189,32 @@ function App() {
                 </button>
               </form>
             </div>  
-              <br/>
-              <p> Staked : {optimizer.staked}</p>
-              <h5> Withdraw LP Token :</h5>
-              <div className='row'>        
+            <h3> Withdraw LP Token :</h3>
+            <div className='row'>        
               <form className="form-inline" onSubmit={e => withdrawLP(e, optimizer.optimizerContract)}>
-              <input 
-                type="number" 
-                className="form-control" 
-                placeholder="Amount to Withdraw"
-              />                  
-              <button 
-                type="submit" 
-                className="btn btn-primary"
-              >
-                Withdraw
-              </button>
-            </form>
+                <input 
+                  type="number" 
+                  className="form-control" 
+                  placeholder="Amount to Withdraw"
+                />                  
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                >
+                  Withdraw
+                </button>
+              </form>
+            </div>
+            <h3> Compound Rewards :</h3>
+            <div className='row'>        
+              <form className="form-inline" onSubmit={e => compound(e, optimizer.optimizerContract)}>                  
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                >
+                  Compound
+                </button>
+              </form>
             </div>  
             </li>
             <br/><br/>          
@@ -218,15 +228,17 @@ function App() {
 
   const approveLP = async (e, optimizer) => {
     e.preventDefault();
+    const amountToApprove= 888888888888;
+    const weiAmountToApprove = utils.parseEther(amountToApprove.toString());
     const optimizerAddr = optimizer.address;
-    const tx = await optimizer.LpContract.approve(optimizerAddr, 100);
+    const tx = await optimizer.LpContract.approve(optimizerAddr, weiAmountToApprove);
     await tx.wait();
   };
 
   const depositLP = async (e, optimizer) => {
     e.preventDefault();
-    const data = e.target.elements[0].value;
-    const tx = await optimizer.stake(data);
+    const amountToDeposit = e.target.elements[0].value;
+    const tx = await optimizer.stake(amountToDeposit);
     await tx.wait();
     const staked = await optimizer.staked();
   };
@@ -235,6 +247,12 @@ function App() {
     e.preventDefault();
     const data = e.target.elements[0].value;
     const tx = await optimizer.withdraw(data);
+    await tx.wait();
+  };
+
+  const compound = async (e, optimizer) => {
+    e.preventDefault();
+    const tx = await optimizer.harvest();
     await tx.wait();
   };
 
@@ -292,53 +310,58 @@ function App() {
 
     <div className='container'>
       <header className='header'>
-        <h2> You : </h2>
+        <h2> User Address : </h2>
             <p>{signerAddr}</p>            
       </header>
-      <br/>
       <div className='row' style={{justifyContent: "center"}}>
-        <h1>Protocols :</h1>
-      </div><br/><br/>
+        <h1>Pools :</h1>
+      </div>
       <div className='row'>        
         <div className='col-sm-6'>                                              
-          <h3>Strategies Supported :</h3>
+          <h3>Pool Available :</h3>
           <StrategySupported strategies={strategies} />
           <br/>
           <br/>
         </div>
         <div className='col-sm-6'>                                              
-          <h3>Add Strategy :</h3>
+          <h3>Add New Pool :</h3>
           <form className="form-inline" onSubmit={e => addNewStrategy(e)}>
             <input 
               type="text" 
               className="form-control" 
               placeholder="Token A Address"
             />
+            <br/>
             <input 
               type="text" 
               className="form-control" 
               placeholder="Token B Address"
             />
+            <br/>
             <input 
               type="text" 
               className="form-control" 
               placeholder="Staking Token Address"
             />
+            <br/>
             <input 
               type="text" 
               className="form-control" 
               placeholder="Reward Token Address"
-            />               
+            />   
+            <br/>
             <input 
               type="text" 
               className="form-control" 
               placeholder="Staking Pool Address"
             />
+            <br/>
             <input 
               type="text" 
               className="form-control" 
               placeholder="UniV2 Router Address"
-            />                                                             
+            />
+            <br/>
             <button 
               type="submit" 
               className="btn btn-primary"
@@ -352,8 +375,7 @@ function App() {
       
       <div className='row' style={{justifyContent: "center"}}>
         <h1>Optimizers :</h1>
-      </div><br/><br/>
-
+      </div>
       <div className='row'> 
         <div className='col-sm-6'>
           <h3>Your Optimizers :</h3>
@@ -361,7 +383,7 @@ function App() {
         </div>     
         <div className='col-sm-6'>
           <div className='row' style={{justifyContent: "flex-end"}}> 
-            <h3>Create Optimizer</h3><br/><br/>
+            <h3>Create Your Own Optimizer :</h3>
             <form className="form-inline" onSubmit={e => createOptimizer(e)}>
             <input 
               type="text" 
@@ -375,7 +397,7 @@ function App() {
               Submit
             </button>
           </form><br/><br/><br/>
-            <h3>Created by the Factory : {optimizerCount.toString()}</h3><br/>
+            <h3>Created  by  the  Factory  :  {optimizerCount.toString()}</h3><br/>
           </div>
         </div>
       </div>
